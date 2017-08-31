@@ -13,7 +13,7 @@ module.exports = function (app) {
         var addresses = [];
 
         $('.adressentbl tr').each(function (i, element) {
-          var address = {};
+          var row = {};
 
           $(this).find('.even, .odd').each(function (j, element) {
             var key;
@@ -30,12 +30,12 @@ module.exports = function (app) {
             }
 
             if (key) {
-              address[key] = $(this).text();
+              row[key] = $(this).text();
             }
           });
 
-          if (address.hasOwnProperty('name')) {
-            addresses.push(address);
+          if (row.hasOwnProperty('club')) {
+            addresses.push(row);
           }
         });
 
