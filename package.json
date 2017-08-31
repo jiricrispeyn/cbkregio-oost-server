@@ -1,0 +1,13 @@
+{
+  "name": "cbk-regio-oost-serve",
+  "version": "1.0.0",
+  "description": "CBK Regio Oost Server",
+  "main": "server.js",
+  "author": "Jiri Crispeyn",
+  "dependencies": {
+    "cheerio": "latest",
+    "express": "latest",
+    "moment": "2.18.1",
+    "request": "latest"
+  }
+}
