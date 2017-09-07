@@ -12,6 +12,7 @@ module.exports = function (app) {
         var $ = cheerio.load(html);
         var leagues = [];
 
+
         $('select[name="afdeling"] > option').each(function (i, element) {
           var text = $(this).text();
 
@@ -20,6 +21,8 @@ module.exports = function (app) {
             text: text
           });
         });
+
+        console.log(leagues);
 
         res.send(leagues);
       }
