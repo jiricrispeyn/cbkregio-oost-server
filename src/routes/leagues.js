@@ -22,8 +22,6 @@ module.exports = function (app) {
           });
         });
 
-        console.log(leagues);
-
         res.send(leagues);
       }
     });
