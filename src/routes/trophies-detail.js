@@ -6,8 +6,7 @@ var app = express();
 
 module.exports = function (app) {
   app.get('/trophies/:id', function (req, res) {
-    // var url = 'http://cbkregio-oost.be/index.php?page=beker&detail=' + req.params.id;
-    var url = 'https://web.archive.org/web/20150313044238/http://cbkregio-oost.be/index.php?page=beker&detail=1';
+    var url = 'http://cbkregio-oost.be/index.php?page=beker&detail=' + req.params.id;
 
     request(url, function (error, response, html) {
       if (!error) {
