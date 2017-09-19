@@ -5,9 +5,9 @@ var moment = require('moment');
 var app = express();
 
 module.exports = function (app) {
-  app.get('/scoresheet/:type/:subType/:id', function (req, res) {
-    var subTypeKey = req.params.subtype === 'competitie' ? 'afdeling' : 'detail';
-    var url = 'http://cbkregio-oost.be/index.php?page=' + req.params.type + '&' + subTypeKey + '=' + req.params.subtype + '&id=' + req.params.id;
+  app.get('/scoresheet/:type/:subtype/:id', function (req, res) {
+    var subtypeKey = req.params.subtype === 'competitie' ? 'afdeling' : 'detail';
+    var url = 'http://cbkregio-oost.be/index.php?page=' + req.params.type + '&' + subtypeKey + '=' + req.params.subtype + '&id=' + req.params.id;
 
     request(url, function (error, response, html) {
       if (!error) {
@@ -157,7 +157,7 @@ module.exports = function (app) {
         res.send({
           id: req.params.id,
           type: req.params.type,
-          sub_type: req.params.subType,
+          sub_type: req.params.subtype,
           date: date,
           home: home,
           away: away,
