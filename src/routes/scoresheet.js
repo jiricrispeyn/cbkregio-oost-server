@@ -9,6 +9,8 @@ module.exports = function (app) {
     var subtypeKey = req.params.subtype === 'competitie' ? 'afdeling' : 'detail';
     var url = 'http://cbkregio-oost.be/index.php?page=' + req.params.type + '&' + subtypeKey + '=' + req.params.subtype + '&id=' + req.params.id;
 
+    console.log(url);
+
     request(url, function (error, response, html) {
       if (!error) {
         var $ = cheerio.load(html);
