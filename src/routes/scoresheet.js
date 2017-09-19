@@ -157,7 +157,7 @@ module.exports = function (app) {
         res.send({
           id: req.params.id,
           type: req.params.type,
-          sub_type: req.params.subtype,
+          subtype: req.params.subtype,
           date: date,
           home: home,
           away: away,
