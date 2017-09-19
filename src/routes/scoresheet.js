@@ -12,6 +12,8 @@ module.exports = function (app) {
     console.log(url);
 
     request(url, function (error, response, html) {
+      console.log(error);
+
       if (!error) {
         var $ = cheerio.load(html);
         var date = null;
