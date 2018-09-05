@@ -1,49 +1,56 @@
 var express = require('express');
 var request = require('request');
 var cheerio = require('cheerio');
-var app = express();
 
-module.exports = function (app) {
-  app.get('/addresses/:league', function (req, res) {
-    var url = 'http://cbkregio-oost.be/index.php?page=adressen&afdeling=' + req.params.league;
+module.exports = app => {
+  app.get('/addresses/:league', (req, res) => {
+    const url = `http://cbkregio-oost.be/index.php?page=adressen&afdeling=${
+      req.params.league
+    }`;
 
-    request(url, function (error, response, html) {
+    request(url, (error, response, html) => {
       if (!error) {
-        var $ = cheerio.load(html);
-        var addresses = [];
+        const $ = cheerio.load(html);
+        let addresses = [];
 
-        $('.adressentbl tr').each(function (i, element) {
-          var row = {};
+        $('.adressentbl tr').each(function() {
+          let row = {};
 
-          $(this).find('.even, .odd').each(function (j, element) {
-            var key;
-            
-            switch (j) {
-              case 0: key = 'club';
-                break;
-              case 1: key = 'place';
-                break;
-              case 2: key = 'address';
-                break;
-              case 3: key = 'phone';
-                break;
-            }
+          $(this)
+            .find('.even, .odd')
+            .each(function(j) {
+              let key;
 
-            if (key) {
-              row[key] = $(this).text();
-            }
-          });
+              switch (j) {
+                case 0:
+                  key = 'club';
+                  break;
+                case 1:
+                  key = 'place';
+                  break;
+                case 2:
+                  key = 'address';
+                  break;
+                case 3:
+                  key = 'phone';
+                  break;
+              }
+
+              if (key) {
+                row[key] = $(this).text();
+              }
+            });
 
           if (row.hasOwnProperty('club')) {
-            addresses.push(row);
+            addresses = [...addresses, row];
           }
         });
 
         res.send({
           league: req.params.league,
-          addresses: addresses
+          addresses
         });
       }
     });
   });
-}
+};
