@@ -1,29 +1,25 @@
-var express = require('express');
-var request = require('request');
-var cheerio = require('cheerio');
-var app = express();
+const express = require('express');
+const request = require('request');
+const cheerio = require('cheerio');
+const app = express();
 
-module.exports = function (app) {
-  app.get('/leagues', function (req, res) {
-    var url = 'http://cbkregio-oost.be/index.php?page=competitie';
+module.exports = app => {
+  app.get('/leagues', (req, res) => {
+    const url = 'http://cbkregio-oost.be/index.php?page=competitie';
 
-    request(url, function (error, response, html) {
+    request(url, function(error, response, html) {
       if (!error) {
-        var $ = cheerio.load(html);
-        var leagues = [];
+        const $ = cheerio.load(html);
+        let leagues = [];
 
+        $('select[name="afdeling"] > option').each(function(i, element) {
+          let text = $(this).text();
 
-        $('select[name="afdeling"] > option').each(function (i, element) {
-          var text = $(this).text();
-
-          leagues.push({
-            id: text,
-            text: text
-          });
+          leagues = [...leagues, { label: text }];
         });
 
         res.send(leagues);
       }
     });
   });
-}
+};
