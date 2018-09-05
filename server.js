@@ -16,7 +16,7 @@ require('./src/routes/leagues')(app);
 require('./src/routes/league-detail')(app);
 require('./src/routes/players')(app);
 require('./src/routes/player-detail')(app);
-require('./src/routes/player-rankings')(app);
+require('./src/routes/elo-ranking')(app);
 require('./src/routes/trophies')(app);
 require('./src/routes/trophies-detail')(app);
 require('./src/routes/scoresheet')(app);
