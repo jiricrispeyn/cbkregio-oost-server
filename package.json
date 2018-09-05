@@ -1,5 +1,5 @@
 {
-  "name": "cbk-regio-oost-serve",
+  "name": "cbkregio-oost-server",
   "version": "1.0.0",
   "description": "CBK Regio Oost Server",
   "main": "server.js",
