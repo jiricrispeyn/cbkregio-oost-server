@@ -5,29 +5,30 @@ var moment = require('moment');
 var app = express();
 
 module.exports = function(app) {
-  app.get('/trophies/:id', function(req, res) {
-    var url =
-      'http://cbkregio-oost.be/index.php?page=beker&detail=' + req.params.id;
+  app.get('/trophies/:id', (req, res) => {
+    const url = `http://cbkregio-oost.be/index.php?page=beker&detail=${
+      req.params.id
+    }`;
 
-    request(url, function(error, response, html) {
+    request(url, (error, response, html) => {
       if (!error) {
-        var $ = cheerio.load(html);
-        var rounds = [];
+        const $ = cheerio.load(html);
+        let rounds = [];
 
-        $('.bekertbl').each(function(i, element) {
-          var round = {
+        $('.bekertbl').each(function() {
+          let round = {
             date: null,
-            games: []
+            games: [],
           };
 
           $(this)
             .find('tr')
-            .each(function(j, element) {
-              var content = $(this).find('.content, .contentwhite');
-              var contentscore = $(this).find(
+            .each(function() {
+              const content = $(this).find('.content, .contentwhite');
+              const contentscore = $(this).find(
                 '.contentscore, .contentscorewhite'
               );
-              var row = {};
+              let row = {};
 
               if (content.length === 0 || contentscore.length === 0) {
                 return;
@@ -35,9 +36,9 @@ module.exports = function(app) {
 
               $(this)
                 .find('td')
-                .each(function(k, element) {
-                  var key;
-                  var team;
+                .each(function(k) {
+                  let key;
+                  let team;
 
                   switch (k) {
                     case 0:
@@ -74,7 +75,7 @@ module.exports = function(app) {
                   }
 
                   if (key) {
-                    var text = $(this).text();
+                    let text = $(this).text();
 
                     if (k === 1 || k === 2 || k === 4 || k === 5) {
                       text = text.replace(/[\n\t\r]/g, '').trim();
@@ -101,23 +102,23 @@ module.exports = function(app) {
                   }
 
                   if (k === 8) {
-                    var scoresheet = $(this)
+                    const scoresheet = $(this)
                       .find('a')
                       .attr('href');
-                    var scoresheet_id = null;
-                    var scoresheet_url = null;
 
-                    if (scoresheet) {
-                      scoresheet_id = scoresheet.split('id=')[1];
-                      scoresheet_url = 'http://cbkregio-oost.be/' + scoresheet;
-                    }
+                    const scoresheet_id = scoresheet
+                      ? scoresheet.split('id=')[1]
+                      : null;
+                    const scoresheet_url = scoresheet
+                      ? `http://cbkregio-oost.be/${scoresheet}`
+                      : null;
 
-                    row.scoresheet_id = scoresheet_id;
-                    row.scoresheet_url = scoresheet_url;
+                    row = { ...row, scoresheet_id, scoresheet_url };
                   }
                 });
 
-              round.games.push(row);
+              const games = [...round.games, row];
+              round = { ...round, games };
             });
 
           var date = $(this)
@@ -127,15 +128,15 @@ module.exports = function(app) {
             .text();
 
           if (moment(date, 'DD-MM-YYYY').isValid()) {
-            round.date = date;
+            round = { ...round, date };
           }
 
-          rounds.push(round);
+          rounds = [...rounds, round];
         });
 
         res.send({
           id: req.params.id,
-          rounds
+          rounds,
         });
       }
     });
