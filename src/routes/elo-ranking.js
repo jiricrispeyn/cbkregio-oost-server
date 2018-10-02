@@ -76,7 +76,7 @@ module.exports = function(app) {
 
         res.send({
           league: req.params.league,
-          players
+          players,
         });
       }
     });

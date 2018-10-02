@@ -48,7 +48,7 @@ module.exports = app => {
 
         res.send({
           league: req.params.league,
-          addresses
+          addresses,
         });
       }
     });

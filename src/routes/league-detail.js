@@ -217,10 +217,10 @@ module.exports = function(app) {
           league: req.params.league,
           previous_matchday: {
             date: last_results_date,
-            results: last_results
+            results: last_results,
           },
           tables: tables,
-          calendar: calendar
+          calendar: calendar,
         });
       }
     });

@@ -53,7 +53,7 @@ module.exports = app => {
 
         res.send({
           league: req.params.league,
-          players
+          players,
         });
       }
     });

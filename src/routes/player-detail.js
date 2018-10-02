@@ -11,7 +11,7 @@ module.exports = app => {
       if (!error) {
         const $ = cheerio.load(html);
         let info = {
-          id: req.params.id
+          id: req.params.id,
         };
         let history = [];
 
@@ -112,7 +112,7 @@ module.exports = app => {
 
         res.send({
           info,
-          history
+          history,
         });
       }
     });

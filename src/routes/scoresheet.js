@@ -24,11 +24,11 @@ module.exports = function(app) {
         var date = null;
         var home = {
           club: null,
-          players: []
+          players: [],
         };
         var away = {
           club: null,
-          players: []
+          players: [],
         };
         var sets = [];
         var result = null;
@@ -136,7 +136,7 @@ module.exports = function(app) {
                 ) {
                   var row = {
                     home: {},
-                    away: {}
+                    away: {},
                   };
 
                   $(this)
@@ -239,7 +239,7 @@ module.exports = function(app) {
           away,
           sets,
           result,
-          comment
+          comment,
         });
       }
     });
