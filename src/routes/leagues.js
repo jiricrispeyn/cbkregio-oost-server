@@ -10,13 +10,13 @@ module.exports = app => {
         const $ = cheerio.load(html);
         let leagues = [];
 
-        $('select[name="afdeling"] > option').each(function() {
+        $('select[name="afdeling"] > option').each(function(i, element) {
           let id = $(this).text();
 
           leagues = [...leagues, { id }];
         });
 
-        res.send(leagues);
+        res.send({ leagues });
       }
     });
   });
