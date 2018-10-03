@@ -2,13 +2,11 @@ var express = require('express');
 var request = require('request');
 var cheerio = require('cheerio');
 var moment = require('moment');
-var app = express();
 
 module.exports = function(app) {
-  app.get('/trophies/:id', (req, res) => {
-    const url = `http://cbkregio-oost.be/index.php?page=beker&detail=${
-      req.params.id
-    }`;
+  app.get('/cups/:id', (req, res) => {
+    const { id } = req.params;
+    const url = `http://cbkregio-oost.be/index.php?page=beker&detail=${id}`;
 
     request(url, (error, response, html) => {
       if (!error) {
@@ -16,8 +14,14 @@ module.exports = function(app) {
         let rounds = [];
 
         $('.bekertbl').each(function() {
+          const date = $(this)
+            .closest('tr')
+            .prev()
+            .find('td')
+            .text();
+
           let round = {
-            date: null,
+            date: moment(date, 'DD-MM-YYYY').isValid() ? date : null,
             games: [],
           };
 
@@ -82,7 +86,7 @@ module.exports = function(app) {
                     }
 
                     if (k === 7 && text.trim().length === 0) {
-                      text = '';
+                      text = null;
                     }
 
                     if (team) {
@@ -93,7 +97,7 @@ module.exports = function(app) {
                       row[team][key] = text;
 
                       if (key === 'club') {
-                        row[team]['won'] =
+                        row[team]['winner'] =
                           $(this).find('img').length > 0 ? true : false;
                       }
                     } else {
@@ -109,11 +113,8 @@ module.exports = function(app) {
                     const scoresheet_id = scoresheet
                       ? scoresheet.split('id=')[1]
                       : null;
-                    const scoresheet_url = scoresheet
-                      ? `http://cbkregio-oost.be/${scoresheet}`
-                      : null;
 
-                    row = { ...row, scoresheet_id, scoresheet_url };
+                    row = { ...row, scoresheet_id };
                   }
                 });
 
@@ -121,21 +122,11 @@ module.exports = function(app) {
               round = { ...round, games };
             });
 
-          var date = $(this)
-            .closest('tr')
-            .prev()
-            .find('td')
-            .text();
-
-          if (moment(date, 'DD-MM-YYYY').isValid()) {
-            round = { ...round, date };
-          }
-
           rounds = [...rounds, round];
         });
 
         res.send({
-          id: req.params.id,
+          id: parseInt(id),
           rounds,
         });
       }
