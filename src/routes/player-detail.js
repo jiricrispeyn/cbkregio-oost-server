@@ -2,16 +2,15 @@ const request = require('request');
 const cheerio = require('cheerio');
 
 module.exports = app => {
-  app.get('/player/:id', (req, res) => {
-    const url = `http://cbkregio-oost.be/index.php?page=archief&detail=speler&lidnr=${
-      req.params.id
-    }`;
+  app.get('/players/:id', (req, res) => {
+    const { id } = req.params.id;
+    const url = `http://cbkregio-oost.be/index.php?page=archief&detail=speler&lidnr=${id}`;
 
     request(url, (error, response, html) => {
       if (!error) {
         const $ = cheerio.load(html);
         let info = {
-          id: req.params.id,
+          id,
         };
         let history = [];
 
