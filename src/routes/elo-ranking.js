@@ -2,10 +2,9 @@ const request = require('request');
 const cheerio = require('cheerio');
 
 module.exports = function(app) {
-  app.get('/elo_ranking/:league', (req, res) => {
-    const url = `http://cbkregio-oost.be/index.php?page=eloranking&afdeling=${
-      req.params.league
-    }`;
+  app.get('/leagues/:league/elo-ranking', (req, res) => {
+    const { league } = req.params;
+    const url = `http://cbkregio-oost.be/index.php?page=eloranking&afdeling=${league}`;
 
     request(url, (error, response, html) => {
       if (!error) {
@@ -22,10 +21,10 @@ module.exports = function(app) {
 
               switch (j) {
                 case 0:
-                  key = 'position';
+                  key = 'rank';
                   break;
                 case 1:
-                  key = 'points';
+                  key = 'rating';
                   break;
                 case 2:
                   key = 'name';
@@ -75,7 +74,7 @@ module.exports = function(app) {
         });
 
         res.send({
-          league: req.params.league,
+          league,
           players,
         });
       }
