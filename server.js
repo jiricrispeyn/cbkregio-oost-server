@@ -1,4 +1,5 @@
 const express = require('express');
+const pjson = require('./package.json');
 const app = express();
 const port = process.env.PORT || 8081;
 
@@ -8,6 +9,7 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept'
   );
+  res.header('Version', pjson.version);
   next();
 });
 
