@@ -10,10 +10,10 @@ module.exports = app => {
         const $ = cheerio.load(html);
         let leagues = [];
 
-        $('select[name="afdeling"] > option').each(function(i, element) {
-          let text = $(this).text();
+        $('select[name="afdeling"] > option').each(function() {
+          let id = $(this).text();
 
-          leagues = [...leagues, { label: text }];
+          leagues = [...leagues, { id }];
         });
 
         res.send(leagues);
