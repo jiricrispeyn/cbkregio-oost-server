@@ -2,10 +2,9 @@ const request = require('request');
 const cheerio = require('cheerio');
 
 module.exports = app => {
-  app.get('/players/:league', (req, res) => {
-    let url = `http://cbkregio-oost.be/index.php?page=spelerslijst&afdeling=${
-      req.params.league
-    }`;
+  app.get('/leagues/:league/players', (req, res) => {
+    const { league } = req.params;
+    let url = `http://cbkregio-oost.be/index.php?page=spelerslijst&afdeling=${league}`;
 
     request(url, (error, response, html) => {
       if (!error) {
@@ -51,10 +50,7 @@ module.exports = app => {
           }
         );
 
-        res.send({
-          league: req.params.league,
-          players,
-        });
+        res.send({ league, players });
       }
     });
   });
