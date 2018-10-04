@@ -7,7 +7,7 @@
   "dependencies": {
     "cheerio": "latest",
     "express": "latest",
-    "moment": "2.18.1",
+    "moment": "2.19.3",
     "request": "latest"
   }
 }
