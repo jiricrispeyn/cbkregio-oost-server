@@ -1,5 +1,6 @@
-var request = require('request');
-var cheerio = require('cheerio');
+const request = require('request');
+const cheerio = require('cheerio');
+const Addresses = require('../models/Addresses');
 
 module.exports = app => {
   app.get('/leagues/:league/addresses', (req, res) => {
@@ -17,22 +18,7 @@ module.exports = app => {
           $(this)
             .find('.even, .odd')
             .each(function(j) {
-              let key;
-
-              switch (j) {
-                case 0:
-                  key = 'club';
-                  break;
-                case 1:
-                  key = 'place';
-                  break;
-                case 2:
-                  key = 'address';
-                  break;
-                case 3:
-                  key = 'phone';
-                  break;
-              }
+              const key = Addresses[`key${j}`];
 
               if (key) {
                 row[key] = $(this).text();
@@ -40,7 +26,7 @@ module.exports = app => {
             });
 
           if (row.hasOwnProperty('club')) {
-            addresses = [...addresses, row];
+            addresses.push(row);
           }
         });
 
