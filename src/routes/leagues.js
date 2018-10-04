@@ -13,7 +13,7 @@ module.exports = app => {
         $('select[name="afdeling"] > option').each(function(i, element) {
           let id = $(this).text();
 
-          leagues = [...leagues, { id }];
+          leagues.push({ id });
         });
 
         res.send({ leagues });
