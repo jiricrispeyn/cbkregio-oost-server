@@ -1,8 +1,6 @@
-var express = require('express');
-var request = require('request');
-var cheerio = require('cheerio');
-var moment = require('moment');
-var app = express();
+const request = require('request');
+const cheerio = require('cheerio');
+const moment = require('moment');
 
 module.exports = function(app) {
   app.get('/leagues/:league', function(req, res) {
