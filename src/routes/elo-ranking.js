@@ -1,5 +1,6 @@
 const request = require('request');
 const cheerio = require('cheerio');
+const EloRanking = require('../models/EloRanking');
 
 module.exports = function(app) {
   app.get('/leagues/:league/elo-ranking', (req, res) => {
@@ -17,60 +18,26 @@ module.exports = function(app) {
           $(this)
             .find('td')
             .each(function(j) {
-              let key;
+              const key = EloRanking[`key${j}`];
 
-              switch (j) {
-                case 0:
-                  key = 'rank';
-                  break;
-                case 1:
-                  key = 'rating';
-                  break;
-                case 2:
-                  key = 'name';
-                  break;
-                case 3:
-                  key = 'id';
-                  break;
-                case 4:
-                  key = 'club';
-                  break;
-                case 5:
-                  key = 'ranking';
-                  break;
-                case 6:
-                  key = 'sets';
-                  break;
-                case 7:
-                  key = 'wins';
-                  break;
-                case 8:
-                  key = 'draws';
-                  break;
-                case 9:
-                  key = 'losses';
-                  break;
-                case 10:
-                  key = 'percentage';
-                  break;
+              if (!key) {
+                return;
               }
 
-              if (key) {
-                let text = $(this).text();
+              let text = $(this).text();
 
-                if ([4, 6, 7, 8, 9, 10].includes(j)) {
-                  text = text.replace(/[\n\t\r]/g, '');
-                }
-
-                if ([0, 1, 6, 7, 8, 9, 10].includes(j)) {
-                  text = parseInt(text);
-                }
-
-                row[key] = text;
+              if ([4, 6, 7, 8, 9, 10].includes(j)) {
+                text = text.replace(/[\n\t\r]/g, '');
               }
+
+              if ([0, 1, 6, 7, 8, 9, 10].includes(j)) {
+                text = parseInt(text);
+              }
+
+              row[key] = text;
             });
 
-          players = [...players, row];
+          players.push(row);
         });
 
         res.send({
