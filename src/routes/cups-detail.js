@@ -92,28 +92,30 @@ module.exports = app => {
 
                   let text = $(this).text();
 
-                  if (key) {
-                    if (team) {
-                      if (k === 1 || k === 2 || k === 4 || k === 5) {
-                        text = text.replace(/[\n\t\r]/g, '').trim();
-                      }
+                  if (!key) {
+                    return;
+                  }
 
-                      row[team] = row[team] || {};
-                      row[team][key] = text;
-                    } else if (k === 6 || k === 7) {
-                      const scores = getScores(text);
-                      row[HOME][key] = scores[HOME];
-                      row[AWAY][key] = scores[AWAY];
-                    } else if (k === 8) {
-                      const scoresheet = $(this)
-                        .find('a')
-                        .attr('href');
-                      const scoresheet_id = scoresheet
-                        ? scoresheet.split('id=')[1]
-                        : null;
-
-                      row[key] = scoresheet_id;
+                  if (team) {
+                    if (k === 1 || k === 2 || k === 4 || k === 5) {
+                      text = text.replace(/[\n\t\r]/g, '').trim();
                     }
+
+                    row[team] = row[team] || {};
+                    row[team][key] = text;
+                  } else if (k === 6 || k === 7) {
+                    const scores = getScores(text);
+                    row[HOME][key] = scores[HOME];
+                    row[AWAY][key] = scores[AWAY];
+                  } else if (k === 8) {
+                    const scoresheet = $(this)
+                      .find('a')
+                      .attr('href');
+                    const scoresheet_id = scoresheet
+                      ? scoresheet.split('id=')[1]
+                      : null;
+
+                    row[key] = scoresheet_id;
                   }
                 });
 
