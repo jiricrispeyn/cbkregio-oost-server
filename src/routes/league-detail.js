@@ -4,25 +4,24 @@ const moment = require('moment');
 
 module.exports = function(app) {
   app.get('/leagues/:league', function(req, res) {
-    var url =
-      'http://cbkregio-oost.be/index.php?page=competitie&afdeling=' +
-      req.params.league;
+    const { league } = req.params;
+    const url = `http://cbkregio-oost.be/index.php?page=competitie&afdeling='${league}`;
 
     request(url, function(error, response, html) {
       if (!error) {
-        var $ = cheerio.load(html);
-        var last_results = [];
-        var last_results_date = null;
-        var tables = [];
-        var calendar = [];
+        const $ = cheerio.load(html);
+        let last_results = [];
+        let last_results_date = null;
+        let tables = [];
+        let calendar = [];
 
-        $('.nieuwstbl .kalendertbl tr').each(function(i, element) {
-          var result = {};
+        $('.nieuwstbl .kalendertbl tr').each(function() {
+          let result = {};
 
           $(this)
             .find('td')
-            .each(function(j, element) {
-              var key;
+            .each(function(j) {
+              let key;
 
               switch (j) {
                 case 0:
@@ -40,7 +39,7 @@ module.exports = function(app) {
               }
 
               if (key) {
-                var text = $(this).text();
+                let text = $(this).text();
 
                 if (j === 4) {
                   text = text.trim();
@@ -53,7 +52,7 @@ module.exports = function(app) {
           last_results.push(result);
         });
 
-        var titleArr = $('.nieuwstbl .nwstitle')
+        const titleArr = $('.nieuwstbl .nwstitle')
           .text()
           .replace(/[\n\t\r]/g, '')
           .trim()
@@ -63,13 +62,13 @@ module.exports = function(app) {
           last_results_date = titleArr[0];
         }
 
-        $('.kalendertbl .klassementtbl tr').each(function(i, element) {
-          var row = {};
+        $('.kalendertbl .klassementtbl tr').each(function() {
+          let row = {};
 
           $(this)
             .find('td:not(.th)')
-            .each(function(j, element) {
-              var key;
+            .each(function(j) {
+              let key;
 
               switch (j) {
                 case 0:
@@ -105,7 +104,7 @@ module.exports = function(app) {
               }
 
               if (key) {
-                var text = $(this).text();
+                const text = $(this).text();
 
                 if (j === 1) {
                   row[key] = text.replace(/[\n\t\r]/g, '').trim();
@@ -118,13 +117,13 @@ module.exports = function(app) {
           tables.push(row);
         });
 
-        $('.kalendertbl .kalendertbl tr').each(function(i, element) {
+        $('.kalendertbl .kalendertbl tr').each(function() {
           $(this)
             .find('td.th')
-            .each(function(j, element) {
+            .each(function(j) {
               if (j === 0) {
-                var row = {};
-                var titleArr = $(this)
+                let row = {};
+                const titleArr = $(this)
                   .text()
                   .trim()
                   .split(' - ');
@@ -144,10 +143,10 @@ module.exports = function(app) {
             });
         });
 
-        var date;
+        let date;
 
-        $('.kalendertbl .kalendertbl tr').each(function(i, element) {
-          var row = {};
+        $('.kalendertbl .kalendertbl tr').each(function() {
+          let row = {};
 
           if ($(this).attr('data-date')) {
             date = $(this).attr('data-date');
@@ -155,7 +154,7 @@ module.exports = function(app) {
 
           $(this)
             .find('td:not(.th)')
-            .each(function(j, element) {
+            .each(function(j) {
               var key;
 
               switch (j) {
@@ -174,7 +173,7 @@ module.exports = function(app) {
               }
 
               if (key) {
-                var text = $(this).text();
+                let text = $(this).text();
 
                 if (j === 4) {
                   text = text.trim();
@@ -184,19 +183,16 @@ module.exports = function(app) {
               }
 
               if (j === 5) {
-                var scoresheet = $(this)
+                const scoresheet = $(this)
                   .find('a')
                   .attr('href');
-                var scoresheet_id = null;
-                var scoresheet_url = null;
+                let scoresheet_id = null;
 
                 if (scoresheet) {
                   scoresheet_id = scoresheet.split('id=')[1];
-                  scoresheet_url = 'http://cbkregio-oost.be/' + scoresheet;
                 }
 
                 row.scoresheet_id = scoresheet_id;
-                row.scoresheet_url = scoresheet_url;
               }
             });
 
@@ -212,13 +208,13 @@ module.exports = function(app) {
         });
 
         res.send({
-          league: req.params.league,
+          league,
           previous_matchday: {
             date: last_results_date,
             results: last_results,
           },
-          tables: tables,
-          calendar: calendar,
+          tables,
+          calendar,
         });
       }
     });
