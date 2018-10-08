@@ -1,10 +1,11 @@
 const request = require('request');
 const cheerio = require('cheerio');
+const Players = require('../models/Players');
 
 module.exports = app => {
   app.get('/leagues/:league/players', (req, res) => {
     const { league } = req.params;
-    let url = `http://cbkregio-oost.be/index.php?page=spelerslijst&afdeling=${league}`;
+    const url = `http://cbkregio-oost.be/index.php?page=spelerslijst&afdeling=${league}`;
 
     request(url, (error, response, html) => {
       if (!error) {
@@ -18,35 +19,16 @@ module.exports = app => {
             $(this)
               .find('td')
               .each(function(j) {
-                let key;
+                const key = Players[`key${j}`];
 
-                switch (j) {
-                  case 1:
-                    key = 'last_name';
-                    break;
-                  case 2:
-                    key = 'first_name';
-                    break;
-                  case 3:
-                    key = 'club';
-                    break;
-                  case 4:
-                    key = 'id';
-                    break;
-                  case 5:
-                    key = 'birthdate';
-                    break;
-                  case 6:
-                    key = 'ranking';
-                    break;
+                if (!key) {
+                  return;
                 }
 
-                if (key) {
-                  row[key] = $(this).text();
-                }
+                row[key] = $(this).text();
               });
 
-            players = [...players, row];
+            players.push(row);
           }
         );
 
