@@ -1,10 +1,12 @@
 const request = require('request');
 const cheerio = require('cheerio');
+const PlayerDetail = require('../models/PlayerDetail');
 
 module.exports = app => {
   app.get('/players/:id', (req, res) => {
-    const { id } = req.params.id;
+    const { id } = req.params;
     const url = `http://cbkregio-oost.be/index.php?page=archief&detail=speler&lidnr=${id}`;
+    const { INFO, HISTORY } = PlayerDetail;
 
     request(url, (error, response, html) => {
       if (!error) {
@@ -18,38 +20,19 @@ module.exports = app => {
           $(this)
             .find('.huidigdetail')
             .each(function() {
-              let key;
+              const key = INFO[`key${i}`];
 
-              switch (i) {
-                case 2:
-                  key = 'last_name';
-                  break;
-                case 3:
-                  key = 'first_name';
-                  break;
-                case 4:
-                  key = 'birthdate';
-                  break;
-                case 5:
-                  key = 'ranking';
-                  break;
-                case 6:
-                  key = 'league';
-                  break;
-                case 7:
-                  key = 'club';
-                  break;
+              if (!key) {
+                return;
               }
 
-              if (key) {
-                let text = $(this).text();
+              let text = $(this).text();
 
-                if ([4, 6, 7].includes(i)) {
-                  text = text.replace(/[\n\t\r]/g, '');
-                }
-
-                info[key] = text;
+              if ([4, 6, 7].includes(i)) {
+                text = text.replace(/[\n\t\r]/g, '');
               }
+
+              info[key] = text;
             });
 
           $(this)
@@ -61,51 +44,31 @@ module.exports = app => {
               $(this)
                 .find('td')
                 .each(function(k) {
-                  let key;
+                  const key = HISTORY[`key${k}`];
 
-                  switch (k) {
-                    case 0:
-                      key = 'season';
-                      break;
-                    case 1:
-                      key = 'ranking';
-                      break;
-                    case 2:
-                      key = 'elo';
-                      break;
-                    case 3:
-                      key = 'league';
-                      break;
-                    case 4:
-                      key = 'club';
-                      break;
-                    case 5:
-                      key = 'position';
-                      break;
-                    case 7:
-                      key = 'autumn_champion';
-                      break;
-                    case 8:
-                      key = 'champion';
-                      break;
+                  if (!key) {
+                    return;
                   }
 
-                  if (key) {
-                    let text = $(this).text();
+                  let text = $(this).text();
 
-                    if (k === 7 || k === 8) {
-                      text = text.replace(/[\n\t\r]/g, '');
-                    }
-
-                    if (k === 0 || k === 5) {
-                      text = parseInt(text);
-                    }
-
-                    row[key] = text;
+                  if ([6, 7, 8].includes(k)) {
+                    text =
+                      text.replace(/[\n\t\r]/g, '') === 'JA' ? true : false;
                   }
+
+                  if (k === 2) {
+                    text = text.split(/[ \[\]\r\n/\\]+/)[1];
+                  }
+
+                  if ([0, 2, 5].includes(k)) {
+                    text = parseInt(text);
+                  }
+
+                  row[key] = text;
                 });
 
-              history = [...history, row];
+              history.push(row);
             });
         });
 
