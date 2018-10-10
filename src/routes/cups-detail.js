@@ -2,8 +2,8 @@ const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment');
 const CupsDetail = require('../models/CupsDetail');
-const HOME = 'home';
-const AWAY = 'away';
+const { HOME, AWAY } = require('../models/Teams');
+const { getScores, getWinner } = require('../utils/matches');
 
 function getTeam(i) {
   if (i === 0 || i === 1 || i === 2) {
@@ -15,40 +15,6 @@ function getTeam(i) {
   }
 
   return;
-}
-
-function getScores(text) {
-  const trimmedText = text.trim();
-
-  if (!trimmedText || trimmedText.length === null) {
-    return {
-      [HOME]: null,
-      [AWAY]: null,
-    };
-  }
-
-  const scores = trimmedText.split(' - ');
-
-  return {
-    [HOME]: parseInt(scores[0]),
-    [AWAY]: parseInt(scores[1]),
-  };
-}
-
-function getWinner(home, away) {
-  if (home.score === null || away.score === null) {
-    return null;
-  }
-
-  if (home.score === away.score) {
-    if (home.tiebreaker === null || away.tiebreaker === null) {
-      return null;
-    }
-
-    return home.tiebreaker > away.tiebreaker ? HOME : AWAY;
-  }
-
-  return home.score > away.score ? HOME : AWAY;
 }
 
 module.exports = app => {
