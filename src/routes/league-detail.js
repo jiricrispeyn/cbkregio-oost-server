@@ -1,56 +1,85 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment');
+const { LATEST_RESULTS } = require('../models/LeagueDetail');
+const { HOME, AWAY } = require('../models/Teams');
+const { getScores, getWinner } = require('../utils/matches');
+
+function getTeam(i) {
+  if (i === 0) {
+    return HOME;
+  }
+
+  if (i === 2) {
+    return AWAY;
+  }
+
+  return;
+}
+
+function getLatestResults($) {
+  const titleArr = $('.nieuwstbl .nwstitle')
+    .text()
+    .replace(/[\n\t\r]/g, '')
+    .trim()
+    .split(' - ');
+  const date = moment(titleArr[0], 'DD-MM-YYYY').isValid() ? titleArr[0] : null;
+  let matches = [];
+
+  $('.nieuwstbl .kalendertbl tr').each(function() {
+    let row = {
+      [HOME]: {},
+      [AWAY]: {},
+    };
+
+    $(this)
+      .find('td')
+      .each(function(j) {
+        const key = LATEST_RESULTS[`key${j}`];
+        const team = getTeam(j);
+
+        if (!key) {
+          return;
+        }
+
+        let text = $(this).text();
+
+        if (team) {
+          row[team][key] = text;
+        } else if (j === 3) {
+          const scores = getScores(text);
+
+          row[HOME][key] = scores[HOME];
+          row[AWAY][key] = scores[AWAY];
+        } else if (j === 4) {
+          const trimmedText = text.trim();
+
+          text = trimmedText.length > 0 ? trimmedText : null;
+          row[key] = text;
+        }
+      });
+
+    row.winner = getWinner(row.home, row.away);
+
+    matches.push(row);
+  });
+
+  return {
+    date,
+    matches,
+  };
+}
 
 module.exports = function(app) {
   app.get('/leagues/:league', function(req, res) {
     const { league } = req.params;
-    const url = `http://cbkregio-oost.be/index.php?page=competitie&afdeling='${league}`;
+    const url = `http://cbkregio-oost.be/index.php?page=competitie&afdeling=${league}`;
 
     request(url, function(error, response, html) {
       if (!error) {
         const $ = cheerio.load(html);
-        let last_results = [];
-        let last_results_date = null;
         let tables = [];
         let calendar = [];
-
-        $('.nieuwstbl .kalendertbl tr').each(function() {
-          let result = {};
-
-          $(this)
-            .find('td')
-            .each(function(j) {
-              let key;
-
-              switch (j) {
-                case 0:
-                  key = 'home';
-                  break;
-                case 2:
-                  key = 'away';
-                  break;
-                case 3:
-                  key = 'result';
-                  break;
-                case 4:
-                  key = 'comment';
-                  break;
-              }
-
-              if (key) {
-                let text = $(this).text();
-
-                if (j === 4) {
-                  text = text.trim();
-                }
-
-                result[key] = text;
-              }
-            });
-
-          last_results.push(result);
-        });
 
         const titleArr = $('.nieuwstbl .nwstitle')
           .text()
@@ -207,12 +236,11 @@ module.exports = function(app) {
           }
         });
 
+        const latestResults = getLatestResults($);
+
         res.send({
           league,
-          previous_matchday: {
-            date: last_results_date,
-            results: last_results,
-          },
+          latest_results: latestResults,
           tables,
           calendar,
         });
