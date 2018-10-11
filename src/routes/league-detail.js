@@ -232,7 +232,7 @@ module.exports = function(app) {
           league,
           latest_results: latestResults,
           tables,
-          calendar,
+          fixtures: calendar,
         });
       }
     });
