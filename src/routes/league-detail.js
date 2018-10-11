@@ -81,16 +81,6 @@ module.exports = function(app) {
         let tables = [];
         let calendar = [];
 
-        const titleArr = $('.nieuwstbl .nwstitle')
-          .text()
-          .replace(/[\n\t\r]/g, '')
-          .trim()
-          .split(' - ');
-
-        if (moment(titleArr[0], 'DD-MM-YYYY').isValid()) {
-          last_results_date = titleArr[0];
-        }
-
         $('.kalendertbl .klassementtbl tr').each(function() {
           let row = {};
 
