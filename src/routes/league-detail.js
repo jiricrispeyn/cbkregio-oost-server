@@ -1,7 +1,6 @@
 const request = require('request');
 const cheerio = require('cheerio');
-const moment = require('moment');
-const { LATEST_RESULTS } = require('../models/LeagueDetail');
+const { TABLES, RESULTS } = require('../models/LeagueDetail');
 const { HOME, AWAY } = require('../models/Teams');
 const { getScores, getWinner } = require('../utils/matches');
 
@@ -17,59 +16,6 @@ function getTeam(i) {
   return;
 }
 
-function getLatestResults($) {
-  const titleArr = $('.nieuwstbl .nwstitle')
-    .text()
-    .replace(/[\n\t\r]/g, '')
-    .trim()
-    .split(' - ');
-  const date = moment(titleArr[0], 'DD-MM-YYYY').isValid() ? titleArr[0] : null;
-  let matches = [];
-
-  $('.nieuwstbl .kalendertbl tr').each(function() {
-    let row = {
-      [HOME]: {},
-      [AWAY]: {},
-    };
-
-    $(this)
-      .find('td')
-      .each(function(j) {
-        const key = LATEST_RESULTS[`key${j}`];
-        const team = getTeam(j);
-
-        if (!key) {
-          return;
-        }
-
-        let text = $(this).text();
-
-        if (team) {
-          row[team][key] = text;
-        } else if (j === 3) {
-          const scores = getScores(text);
-
-          row[HOME][key] = scores[HOME];
-          row[AWAY][key] = scores[AWAY];
-        } else if (j === 4) {
-          const trimmedText = text.trim();
-
-          text = trimmedText.length > 0 ? trimmedText : null;
-          row[key] = text;
-        }
-      });
-
-    row.winner = getWinner(row.home, row.away);
-
-    matches.push(row);
-  });
-
-  return {
-    date,
-    matches,
-  };
-}
-
 module.exports = function(app) {
   app.get('/leagues/:league', function(req, res) {
     const { league } = req.params;
@@ -79,58 +25,34 @@ module.exports = function(app) {
       if (!error) {
         const $ = cheerio.load(html);
         let tables = [];
-        let calendar = [];
+        let results = [];
 
-        $('.kalendertbl .klassementtbl tr').each(function() {
+        $('.kalendertbl .klassementtbl tr').each(function(i) {
+          // Skip header cells
+          if (i === 0) {
+            return;
+          }
+
           let row = {};
 
           $(this)
             .find('td:not(.th)')
             .each(function(j) {
-              let key;
+              const key = TABLES[`key${j}`];
 
-              switch (j) {
-                case 0:
-                  key = 'position';
-                  break;
-                case 1:
-                  key = 'club';
-                  break;
-                case 2:
-                  key = 'played';
-                  break;
-                case 3:
-                  key = 'won';
-                  break;
-                case 4:
-                  key = 'lost';
-                  break;
-                case 5:
-                  key = 'draw';
-                  break;
-                case 6:
-                  key = 'setpoints';
-                  break;
-                case 7:
-                  key = 'points';
-                  break;
-                case 8:
-                  key = 'kvl1';
-                  break;
-                case 9:
-                  key = 'kvl2';
-                  break;
+              if (!key) {
+                return;
               }
 
-              if (key) {
-                const text = $(this).text();
+              let text = $(this).text();
 
-                if (j === 1) {
-                  row[key] = text.replace(/[\n\t\r]/g, '').trim();
-                } else {
-                  row[key] = parseInt(text);
-                }
+              if (j === 1) {
+                text = text.replace(/[\n\t\r]/g, '').trim();
+              } else {
+                text = parseInt(text);
               }
+
+              row[key] = text;
             });
 
           tables.push(row);
@@ -140,99 +62,91 @@ module.exports = function(app) {
           $(this)
             .find('td.th')
             .each(function(j) {
-              if (j === 0) {
-                let row = {};
-                const titleArr = $(this)
-                  .text()
-                  .trim()
-                  .split(' - ');
-
-                row.date = moment(titleArr[0], 'DD-MM-YYYY').isValid()
-                  ? titleArr[0]
-                  : null;
-                row.type = titleArr[1];
-                row.games = [];
-
-                $(this)
-                  .parent()
-                  .attr('data-date', row.date);
-
-                calendar.push(row);
+              if (j !== 0) {
+                return;
               }
+
+              let textArr = $(this)
+                .text()
+                .trim()
+                .split(' - ');
+              const date = textArr[0];
+              const competition = textArr[1];
+
+              $(this)
+                .parent()
+                .attr('data-date', date);
+
+              results.push({ date, competition, matches: null });
             });
         });
 
         let date;
 
         $('.kalendertbl .kalendertbl tr').each(function() {
-          let row = {};
-
           if ($(this).attr('data-date')) {
             date = $(this).attr('data-date');
+
+            return;
           }
+
+          let row = {};
 
           $(this)
             .find('td:not(.th)')
             .each(function(j) {
-              var key;
+              const key = RESULTS[`key${j}`];
 
-              switch (j) {
-                case 0:
-                  key = 'home';
-                  break;
-                case 2:
-                  key = 'away';
-                  break;
-                case 3:
-                  key = 'result';
-                  break;
-                case 4:
-                  key = 'comment';
-                  break;
+              if (!key) {
+                return;
               }
 
-              if (key) {
-                let text = $(this).text();
+              const team = getTeam(j);
+              let text = $(this).text();
 
-                if (j === 4) {
-                  text = text.trim();
-                }
+              if (team) {
+                row[team] = row[team] || {};
+                row[team][key] = text;
+              } else if (j === 3) {
+                const scores = getScores(text);
 
-                row[key] = text;
-              }
-
-              if (j === 5) {
+                row[HOME][key] = scores[HOME] || null;
+                row[AWAY][key] = scores[AWAY] || null;
+              } else if (j === 4) {
+                row[key] = text.trim() || null;
+              } else if (j === 5) {
                 const scoresheet = $(this)
                   .find('a')
                   .attr('href');
-                let scoresheet_id = null;
+                const scoresheet_id = scoresheet
+                  ? scoresheet.split('id=')[1]
+                  : null;
 
-                if (scoresheet) {
-                  scoresheet_id = scoresheet.split('id=')[1];
-                }
-
-                row.scoresheet_id = scoresheet_id;
+                row[key] = scoresheet_id;
               }
             });
 
-          if (row.hasOwnProperty('home')) {
-            calendar = calendar.map(item => {
-              if (item.date === date) {
-                item.games.push(row);
-              }
+          row.winner = getWinner(row.home, row.away);
 
-              return item;
-            });
-          }
+          results = results.map(result => {
+            if (result.date !== date) {
+              return result;
+            }
+
+            const { matches: prevMatches, ...others } = result;
+            const matches = [...(prevMatches || []), row];
+
+            return {
+              ...others,
+              matches,
+            };
+          });
         });
-
-        const latestResults = getLatestResults($);
 
         res.send({
           league,
-          latest_results: latestResults,
           tables,
-          fixtures: calendar,
+          results,
         });
       }
     });
