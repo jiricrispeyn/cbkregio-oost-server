@@ -1,12 +1,11 @@
 const request = require('request');
 const cheerio = require('cheerio');
-const PlayerDetail = require('../models/PlayerDetail');
+const { INFO, HISTORY } = require('../models/PlayerDetail');
 
 module.exports = app => {
   app.get('/players/:id', (req, res) => {
     const { id } = req.params;
     const url = `http://cbkregio-oost.be/index.php?page=archief&detail=speler&lidnr=${id}`;
-    const { INFO, HISTORY } = PlayerDetail;
 
     request(url, (error, response, html) => {
       if (!error) {
