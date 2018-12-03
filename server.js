@@ -21,7 +21,7 @@ require('./src/routes/player-detail')(app);
 require('./src/routes/elo-ranking')(app);
 require('./src/routes/cups')(app);
 require('./src/routes/cups-detail')(app);
-require('./src/routes/scoresheet')(app);
+require('./src/routes/league-scoresheet')(app);
 
 app.listen(port, () => {
   console.log('App is running on http://localhost:' + port);
