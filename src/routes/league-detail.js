@@ -2,7 +2,7 @@ const request = require('request');
 const cheerio = require('cheerio');
 const { TABLES, RESULTS } = require('../models/LeagueDetail');
 const { HOME, AWAY } = require('../models/Teams');
-const { getScores, getWinner } = require('../utils/matches');
+const { getScores, getWinner, matchTypes } = require('../utils/matches');
 
 function getTeam(i) {
   if (i === 0) {
@@ -71,13 +71,13 @@ module.exports = function(app) {
                 .trim()
                 .split(' - ');
               const date = textArr[0];
-              const competition = textArr[1];
+              const type = matchTypes[textArr[1]] || null;
 
               $(this)
                 .parent()
                 .attr('data-date', date);
 
-              results.push({ date, competition, matches: null });
+              results.push({ date, type, matches: null });
             });
         });
 
