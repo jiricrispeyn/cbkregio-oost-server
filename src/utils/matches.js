@@ -46,7 +46,13 @@ function getWinner(home, away) {
   return home.score > away.score ? HOME : AWAY;
 }
 
+const matchTypes = {
+  Competitie: 'league',
+  Beker: 'cup',
+};
+
 module.exports = {
   getScores,
   getWinner,
+  matchTypes,
 };
