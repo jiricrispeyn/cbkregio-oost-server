@@ -109,9 +109,8 @@ module.exports = function(app) {
                 row[team][key] = text;
               } else if (j === 3) {
                 const scores = getScores(text);
-
-                row[HOME][key] = scores[HOME] || null;
-                row[AWAY][key] = scores[AWAY] || null;
+                row[HOME][key] = isNaN(scores[HOME]) ? null : scores[HOME];
+                row[AWAY][key] = isNaN(scores[AWAY]) ? null : scores[AWAY];
               } else if (j === 4) {
                 row[key] = text.trim() || null;
               } else if (j === 5) {

@@ -71,8 +71,8 @@ module.exports = app => {
                     row[team][key] = text;
                   } else if (k === 6 || k === 7) {
                     const scores = getScores(text);
-                    row[HOME][key] = scores[HOME];
-                    row[AWAY][key] = scores[AWAY];
+                    row[HOME][key] = isNaN(scores[HOME]) ? null : scores[HOME];
+                    row[AWAY][key] = isNaN(scores[AWAY]) ? null : scores[AWAY];
                   } else if (k === 8) {
                     const scoresheet = $(this)
                       .find('a')
