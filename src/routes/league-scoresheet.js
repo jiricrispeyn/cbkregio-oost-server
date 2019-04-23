@@ -1,6 +1,7 @@
 const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment');
+const groupBy = require('lodash.groupby');
 const { HOME, AWAY } = require('../models/Teams');
 const pairs = {
   2: 'A',
@@ -28,6 +29,12 @@ module.exports = app => {
         let date = null;
         let response = {};
 
+        let players = {
+          [HOME]: [],
+          [AWAY]: [],
+        };
+        let playersIdx = 0;
+
         $('.klassementtbl > tbody > tr').each(function(i) {
           if (i === 0) {
             const text = $(this)
@@ -52,17 +59,19 @@ module.exports = app => {
                   team = AWAY;
                 }
 
-                if (team) {
-                  const text = $(this)
-                    .text()
-                    .trim()
-                    .split(' : ')[1];
-
-                  response[team] = {
-                    ...response[team],
-                    club: text,
-                  };
+                if (!team) {
+                  return;
                 }
+
+                const text = $(this)
+                  .text()
+                  .trim()
+                  .split(' : ')[1];
+
+                response[team] = {
+                  ...response[team],
+                  club: text,
+                };
               });
           }
 
@@ -84,17 +93,44 @@ module.exports = app => {
                   team = AWAY;
                 }
 
-                if (team) {
-                  const text = $(this)
-                    .text()
-                    .trim();
-
-                  console.log(team);
-                  console.log(text);
-                  console.log('=====');
+                if (!team) {
+                  return;
                 }
+
+                let key;
+                let text = $(this)
+                  .text()
+                  .trim();
+
+                if (j === 1 || j === 4) {
+                  key = 'name';
+                } else if (j === 2 || j === 5) {
+                  key = 'id';
+                  text = text.slice(1, -1);
+                }
+
+                if (text.length === 0) {
+                  text = null;
+                }
+
+                players[team][playersIdx] = players[team][playersIdx] || {};
+                players[team][playersIdx][key] = text;
               });
+
+            players[HOME][playersIdx] = { ...players[HOME][playersIdx], pair };
+            players[AWAY][playersIdx] = { ...players[AWAY][playersIdx], pair };
+
+            ++playersIdx;
           }
+
+          response[HOME] = {
+            ...response[HOME],
+            lineup: groupBy(players[HOME].filter(player => player.id), 'pair'),
+          };
+          response[AWAY] = {
+            ...response[AWAY],
+            lineup: groupBy(players[AWAY].filter(player => player.id), 'pair'),
+          };
         });
 
         res.send({
