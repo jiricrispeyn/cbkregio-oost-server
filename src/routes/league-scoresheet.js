@@ -2,6 +2,19 @@ const request = require('request');
 const cheerio = require('cheerio');
 const moment = require('moment');
 const { HOME, AWAY } = require('../models/Teams');
+const pairs = {
+  2: 'A',
+  3: 'A',
+  4: 'B',
+  5: 'B',
+  6: 'C',
+  7: 'C',
+  9: 'R',
+  10: 'R',
+  11: 'R',
+  12: 'R',
+  13: 'R',
+};
 
 module.exports = app => {
   app.get('/leagues/:league/scoresheet/:id', (req, res) => {
@@ -49,6 +62,36 @@ module.exports = app => {
                     ...response[team],
                     club: text,
                   };
+                }
+              });
+          }
+
+          if (i >= 2 && i <= 13) {
+            const pair = pairs[i];
+
+            if (!pair) {
+              return;
+            }
+
+            $(this)
+              .find('td')
+              .each(function(j) {
+                let team;
+
+                if (j === 1 || j === 2) {
+                  team = HOME;
+                } else if (j === 4 || j === 5) {
+                  team = AWAY;
+                }
+
+                if (team) {
+                  const text = $(this)
+                    .text()
+                    .trim();
+
+                  console.log(team);
+                  console.log(text);
+                  console.log('=====');
                 }
               });
           }
