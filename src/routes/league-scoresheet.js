@@ -35,6 +35,8 @@ module.exports = app => {
         };
         let playersIdx = 0;
 
+        let sets = [];
+
         $('.klassementtbl > tbody > tr').each(function(i) {
           if (i === 0) {
             const text = $(this)
@@ -123,6 +125,55 @@ module.exports = app => {
             ++playersIdx;
           }
 
+          if (i === 14) {
+            $(this)
+              .find('table > tbody > tr')
+              .each(function(j) {
+                if (j >= 2 && j <= 10) {
+                  let set_number;
+                  let homeSetScore;
+                  let awaySetScore;
+                  let homeSetPoints;
+                  let awaySetPoints;
+
+                  $(this)
+                    .find('td')
+                    .each(function(k) {
+                      let text = $(this).text();
+
+                      console.log({ [k]: text });
+
+                      if (k === 0) {
+                        set = parseInt(text);
+                      }
+
+                      if (k === 2) {
+                        [homeSetScore, awaySetScore] = text.split(' - ');
+                      }
+
+                      if (k === 3) {
+                        [homeSetPoints, awaySetPoints] = text.split('-');
+                      }
+                    });
+
+                  sets = [
+                    ...sets,
+                    {
+                      set_number,
+                      [HOME]: {
+                        score: homeSetScore,
+                        points: homeSetPoints,
+                      },
+                      [AWAY]: {
+                        score: awaySetScore,
+                        points: awaySetPoints,
+                      },
+                    },
+                  ];
+                }
+              });
+          }
+
           response[HOME] = {
             ...response[HOME],
             lineup: groupBy(players[HOME].filter(player => player.id), 'pair'),
@@ -136,6 +187,7 @@ module.exports = app => {
         res.send({
           date,
           ...response,
+          sets,
         });
       }
     });
