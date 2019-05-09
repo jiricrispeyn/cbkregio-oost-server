@@ -3,6 +3,8 @@ const cheerio = require('cheerio');
 const moment = require('moment');
 const groupBy = require('lodash.groupby');
 const { HOME, AWAY } = require('../models/Teams');
+const { getScores, getWinner } = require('../utils/matches');
+
 const pairs = {
   2: 'A',
   3: 'A',
@@ -131,10 +133,10 @@ module.exports = app => {
               .each(function(j) {
                 if (j >= 2 && j <= 10) {
                   let set_number;
-                  let homeSetScore;
-                  let awaySetScore;
-                  let homeSetPoints;
-                  let awaySetPoints;
+                  let results = {
+                    [HOME]: {},
+                    [AWAY]: {},
+                  };
 
                   $(this)
                     .find('td')
@@ -144,30 +146,39 @@ module.exports = app => {
                       console.log({ [k]: text });
 
                       if (k === 0) {
-                        set = parseInt(text);
-                      }
+                        set_number = parseInt(text);
+                      } else if (k === 1) {
+                        text = text.replace(/[\n\t\r\']/g, '').trim();
 
-                      if (k === 2) {
-                        [homeSetScore, awaySetScore] = text.split(' - ');
-                      }
+                        const [pairHome, pairAway] = text.split(' -');
 
-                      if (k === 3) {
-                        [homeSetPoints, awaySetPoints] = text.split('-');
+                        results[HOME].pair = pairHome;
+                        results[AWAY].pair = pairAway;
+                      } else if (k === 2) {
+                        const scores = getScores(text);
+
+                        results[HOME].score = isNaN(scores[HOME])
+                          ? null
+                          : scores[HOME];
+                        results[AWAY].score = isNaN(scores[AWAY])
+                          ? null
+                          : scores[AWAY];
+                      } else if (k === 3) {
+                        const [setpointsHome, setpointsAway] = text.split('-');
+
+                        results[HOME].setpoints = parseInt(setpointsHome);
+                        results[AWAY].setpoints = parseInt(setpointsAway);
                       }
                     });
+
+                  const winner = getWinner(results[HOME], results[AWAY]);
 
                   sets = [
                     ...sets,
                     {
                       set_number,
-                      [HOME]: {
-                        score: homeSetScore,
-                        points: homeSetPoints,
-                      },
-                      [AWAY]: {
-                        score: awaySetScore,
-                        points: awaySetPoints,
-                      },
+                      ...results,
+                      winner,
                     },
                   ];
                 }
