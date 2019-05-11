@@ -45,11 +45,15 @@ module.exports = app => {
         let date = null;
         let clubs = {
           [HOME]: {
-            lineup: [],
+            lineup: {},
           },
           [AWAY]: {
-            lineup: [],
+            lineup: {},
           },
+        };
+        let lineup = {
+          [HOME]: [],
+          [AWAY]: [],
         };
         let playersIdx = 0;
 
@@ -87,8 +91,6 @@ module.exports = app => {
               return;
             }
 
-            console.log({ pair });
-
             $(this)
               .find('td')
               .each(function(j) {
@@ -120,169 +122,79 @@ module.exports = app => {
                   text = null;
                 }
 
-                clubs[team].lineup[playersIdx] = clubs[team].lineup[
-                  playersIdx
-                ] || {
+                lineup[team][playersIdx] = lineup[team][playersIdx] || {
                   pair,
                 };
-                clubs[team].lineup[playersIdx][key] = text;
+                lineup[team][playersIdx][key] = text;
               });
 
             ++playersIdx;
-
-            // $(this)
-            //   .find('td')
-            //   .each(function(j) {
-            //     let team;
-
-            //     if (j === 1 || j === 2) {
-            //       team = HOME;
-            //     } else if (j === 4 || j === 5) {
-            //       team = AWAY;
-            //     }
-
-            //     if (!team) {
-            //       return;
-            //     }
-
-            //     let key;
-            //     let text = $(this)
-            //       .text()
-            //       .trim();
-
-            //     if (j === 1 || j === 4) {
-            //       key = 'name';
-            //     } else if (j === 2 || j === 5) {
-            //       key = 'id';
-            //       text = text.slice(1, -1);
-            //     }
-
-            //     if (text.length === 0) {
-            //       text = null;
-            //     }
-
-            //     clubs[team][playersIdx] = players[team][playersIdx] || {};
-            //     clubs[team][playersIdx][key] = text;
-            //   });
-
-            // clubs[HOME][playersIdx] = { ...players[HOME][playersIdx], pair };
-            // clubs[AWAY][playersIdx] = { ...players[AWAY][playersIdx], pair };
-
-            // ++playersIdx;
           }
 
-          // if (i >= 2 && i <= 13) {
-          //   const pair = pairs[i];
+          clubs[HOME].lineup = groupBy(
+            lineup[HOME].filter(player => player.id),
+            'pair'
+          );
+          clubs[AWAY].lineup = groupBy(
+            lineup[AWAY].filter(player => player.id),
+            'pair'
+          );
 
-          //   if (!pair) {
-          //     return;
-          //   }
+          if (i === 14) {
+            $(this)
+              .find('table > tbody > tr')
+              .each(function(j) {
+                if (j >= 2 && j <= 10) {
+                  let set_number;
+                  let results = {
+                    [HOME]: {},
+                    [AWAY]: {},
+                  };
 
-          //   $(this)
-          //     .find('td')
-          //     .each(function(j) {
-          //       let team;
+                  $(this)
+                    .find('td')
+                    .each(function(k) {
+                      let text = $(this).text();
 
-          //       if (j === 1 || j === 2) {
-          //         team = HOME;
-          //       } else if (j === 4 || j === 5) {
-          //         team = AWAY;
-          //       }
+                      if (k === 0) {
+                        set_number = parseInt(text);
+                      } else if (k === 1) {
+                        text = text.replace(/[\n\t\r\']/g, '').trim();
 
-          //       if (!team) {
-          //         return;
-          //       }
+                        const [pairHome, pairAway] = text.split(' -');
 
-          //       let key;
-          //       let text = $(this)
-          //         .text()
-          //         .trim();
+                        results[HOME].pair = pairHome;
+                        results[AWAY].pair = pairAway;
+                      } else if (k === 2) {
+                        const scores = getScores(text);
 
-          //       if (j === 1 || j === 4) {
-          //         key = 'name';
-          //       } else if (j === 2 || j === 5) {
-          //         key = 'id';
-          //         text = text.slice(1, -1);
-          //       }
+                        results[HOME].score = isNaN(scores[HOME])
+                          ? null
+                          : scores[HOME];
+                        results[AWAY].score = isNaN(scores[AWAY])
+                          ? null
+                          : scores[AWAY];
+                      } else if (k === 3) {
+                        const [setpointsHome, setpointsAway] = text.split('-');
 
-          //       if (text.length === 0) {
-          //         text = null;
-          //       }
+                        results[HOME].setpoints = parseInt(setpointsHome);
+                        results[AWAY].setpoints = parseInt(setpointsAway);
+                      }
+                    });
 
-          //       players[team][playersIdx] = players[team][playersIdx] || {};
-          //       players[team][playersIdx][key] = text;
-          //     });
+                  const winner = getWinner(results[HOME], results[AWAY]);
 
-          //   players[HOME][playersIdx] = { ...players[HOME][playersIdx], pair };
-          //   players[AWAY][playersIdx] = { ...players[AWAY][playersIdx], pair };
-
-          //   ++playersIdx;
-          // }
-
-          // if (i === 14) {
-          //   $(this)
-          //     .find('table > tbody > tr')
-          //     .each(function(j) {
-          //       if (j >= 2 && j <= 10) {
-          //         let set_number;
-          //         let results = {
-          //           [HOME]: {},
-          //           [AWAY]: {},
-          //         };
-
-          //         $(this)
-          //           .find('td')
-          //           .each(function(k) {
-          //             let text = $(this).text();
-
-          //             if (k === 0) {
-          //               set_number = parseInt(text);
-          //             } else if (k === 1) {
-          //               text = text.replace(/[\n\t\r\']/g, '').trim();
-
-          //               const [pairHome, pairAway] = text.split(' -');
-
-          //               results[HOME].pair = pairHome;
-          //               results[AWAY].pair = pairAway;
-          //             } else if (k === 2) {
-          //               const scores = getScores(text);
-
-          //               results[HOME].score = isNaN(scores[HOME])
-          //                 ? null
-          //                 : scores[HOME];
-          //               results[AWAY].score = isNaN(scores[AWAY])
-          //                 ? null
-          //                 : scores[AWAY];
-          //             } else if (k === 3) {
-          //               const [setpointsHome, setpointsAway] = text.split('-');
-
-          //               results[HOME].setpoints = parseInt(setpointsHome);
-          //               results[AWAY].setpoints = parseInt(setpointsAway);
-          //             }
-          //           });
-
-          //         const winner = getWinner(results[HOME], results[AWAY]);
-
-          //         sets = [
-          //           ...sets,
-          //           {
-          //             set_number,
-          //             ...results,
-          //             winner,
-          //           },
-          //         ];
-          //       }
-          //     });
-          // }
-
-          // response[HOME] = {
-          //   ...response[HOME],
-          //   lineup: groupBy(players[HOME].filter(player => player.id), 'pair'),
-          // };
-          // response[AWAY] = {
-          //   ...response[AWAY],
-          //   lineup: groupBy(players[AWAY].filter(player => player.id), 'pair'),
-          // };
+                  sets = [
+                    ...sets,
+                    {
+                      set_number,
+                      ...results,
+                      winner,
+                    },
+                  ];
+                }
+              });
+          }
         });
 
         res.send({
