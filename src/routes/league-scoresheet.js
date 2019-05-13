@@ -56,9 +56,8 @@ module.exports = app => {
           [AWAY]: [],
         };
         let playersIdx = 0;
-
-        let response = {};
         let sets = [];
+        let winner;
 
         $('.klassementtbl > tbody > tr').each(function(i) {
           if (i === 0) {
@@ -207,8 +206,8 @@ module.exports = app => {
           id,
           date,
           clubs,
-          ...response,
           sets,
+          winner,
         });
       }
     });
