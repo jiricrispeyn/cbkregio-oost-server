@@ -198,6 +198,20 @@ module.exports = app => {
                     },
                   ];
                 }
+
+                if (j === 11) {
+                  let text = $(this)
+                    .children()
+                    .last()
+                    .text();
+
+                  const scores = getScores(text);
+
+                  clubs[HOME].score = isNaN(scores[HOME]) ? null : scores[HOME];
+                  clubs[AWAY].score = isNaN(scores[AWAY]) ? null : scores[AWAY];
+
+                  winner = getWinner(clubs[HOME], clubs[AWAY]);
+                }
               });
           }
         });
