@@ -156,7 +156,7 @@ module.exports = app => {
                     .each(function(k) {
                       let text = $(this).text();
 
-                      const key = SETS[`key${i}`];
+                      const key = SETS[`key${k}`];
 
                       if (!key) {
                         return;
