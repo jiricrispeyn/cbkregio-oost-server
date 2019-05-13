@@ -169,22 +169,22 @@ module.exports = app => {
 
                         const [pairHome, pairAway] = text.split(' -');
 
-                        results[HOME].pair = pairHome;
-                        results[AWAY].pair = pairAway;
+                        results[HOME][key] = pairHome;
+                        results[AWAY][key] = pairAway;
                       } else if (k === 2) {
                         const scores = getScores(text);
 
-                        results[HOME].score = isNaN(scores[HOME])
+                        results[HOME][key] = isNaN(scores[HOME])
                           ? null
                           : scores[HOME];
-                        results[AWAY].score = isNaN(scores[AWAY])
+                        results[AWAY][key] = isNaN(scores[AWAY])
                           ? null
                           : scores[AWAY];
                       } else if (k === 3) {
                         const [setpointsHome, setpointsAway] = text.split('-');
 
-                        results[HOME].setpoints = parseInt(setpointsHome);
-                        results[AWAY].setpoints = parseInt(setpointsAway);
+                        results[HOME][key] = parseInt(setpointsHome);
+                        results[AWAY][key] = parseInt(setpointsAway);
                       }
                     });
 
