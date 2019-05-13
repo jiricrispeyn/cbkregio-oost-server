@@ -157,10 +157,6 @@ module.exports = app => {
 
                       const key = SETS[`key${k}`];
 
-                      if (!key) {
-                        return;
-                      }
-
                       if (k === 0) {
                         set_number = parseInt(text);
                       } else if (k === 1) {
@@ -184,6 +180,26 @@ module.exports = app => {
 
                         results[HOME][key] = parseInt(setpointsHome);
                         results[AWAY][key] = parseInt(setpointsAway);
+                      } else if (k === 6 || k == 8 || k == 10 || k == 12) {
+                        text = text.trim();
+
+                        if (!text) {
+                          return;
+                        }
+
+                        const team = k === 6 || k === 8 ? HOME : AWAY;
+                        const prevSubstitutions =
+                          results[team].substitutions || [];
+
+                        results[team].substitutions = [
+                          ...prevSubstitutions,
+                          {
+                            in: text.substr(2),
+                            out: $(this)
+                              .prev()
+                              .text(),
+                          },
+                        ];
                       }
                     });
 
