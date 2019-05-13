@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const moment = require('moment');
 const groupBy = require('lodash.groupby');
 const { HOME, AWAY } = require('../models/Teams');
-const { SCORESHEET } = require('../models/Scoresheet');
+const { SCORESHEET, SETS } = require('../models/Scoresheet');
 const { getScores, getWinner } = require('../utils/matches');
 
 const pairs = {
@@ -155,6 +155,12 @@ module.exports = app => {
                     .find('td')
                     .each(function(k) {
                       let text = $(this).text();
+
+                      const key = SETS[`key${i}`];
+
+                      if (!key) {
+                        return;
+                      }
 
                       if (k === 0) {
                         set_number = parseInt(text);
