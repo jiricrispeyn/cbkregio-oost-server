@@ -234,6 +234,7 @@ module.exports = app => {
 
         res.send({
           id,
+          league,
           date,
           clubs,
           sets,
